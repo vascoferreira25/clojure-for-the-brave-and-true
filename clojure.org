@@ -1,0 +1,2618 @@
+* Clojure
+  :PROPERTIES:
+  :TUTORIAL: https://www.braveclojure.com/
+  :END:
+
+     Simplicity
+     #+BEGIN_QUOTE Alan Perlis
+     It is better to have 100 functions operate on one data structure than 10 functions on 10 data structures.
+—Alan Perlis
+     #+END_QUOTE
+
+** Install
+   - Install Java JDK (development kit)
+   - Install leiningen - [[https://djpowell.github.io/leiningen-win-installer/][link to download]]
+   - Go to the folder, run cmd on folder as admin
+     #+BEGIN_SRC shell
+
+lein self-install
+
+     #+END_SRC
+     - If it doesn't work, download zip file from github and change
+       LEIN_JAR=""...... ".jar" to ".zip"
+** Run
+   - Use *, '* to run a clojure shell
+   - Use *, e b* to evaluate buffer
+   - Close the server by closing the CIDER buffer
+
+** New Clojure Project
+   #+BEGIN_SRC shell
+
+# Go to folder
+cd ..
+
+# Create new project with leiningen
+lein new app clojure-noob
+
+# To run the project, must go to directory
+cd clojure-noob
+
+# Run
+lein run
+
+# Build the project, the .jar file will go to folder ./target/uberjar
+lein uberjar
+
+# To run .jar go to folder
+cd target/uberjar
+
+# Run jar file
+java -jar /clojure-noob...........jar
+
+# Open REPL
+lein repl
+# clojure-noob.core> means that we are in .core namespace
+
+   #+END_SRC
+
+   The project.clj file tells leiningen which function to run first and which packages are required.
+   All of the source code should be in ~./src/<project-name>core.clj~. The resources folder will, eventually, have other files
+   as images et cetera.
+   The folder tests will have tests.
+
+** REPL
+
+   The REPL works as a SSH. It is possible to interact with a running process
+   and modify it while running.
+
+   When in file.clj and using ~, e f~ it will send the function at point to REPL
+   and show the output or print.
+
+   To load buffer to repl ~Ctrl c Ctrl k~ or ~, e b~.
+
+   #+BEGIN_SRC clojure
+
+;; Executes -main function
+(-main)
+
+;; Sum
+(+ 1 2 3 4)
+; => 10
+
+;; First element of list
+(first [1 2 3 4])
+; => 1
+
+;; Increment list
+(map inc [1 2 3 4])
+; => (2 3 4 5)
+
+;; Reduce
+(reduce + [5 6 100])
+; => 111
+
+   #+END_SRC
+
+** Crash-Course
+*** Summary
+
+**** Data Structures
+***** Maps
+      #+BEGIN_SRC clojure
+
+
+;; Maps
+{} ;; empty
+;; `:key` and `value`
+{:first-name "Charlie"
+ :last-name "McFishwich"}
+
+;; Binding `+` function to a variable
+{"string-key" +}
+
+;; Nested Maps
+{:name {:first "John"
+        :middle "Jacob"
+        :last "Jingleheimerschmidt"}}
+
+;; map values can be of any type, even functions
+{:summy + :subtracty -}
+
+;; Hash-map creates a map
+(hash-map :a 1 :b 2)
+
+;; Get the values of a `key`
+(get {:a 0 :b 1} :b)
+; => 1
+
+(get {:a 0 :b {:c "ho hum"}} :b)
+; => {:c "hu hum"}
+
+;; Get returns `nill` if there isnt a key
+(get {:a 0 :b 1} :c)
+; => nil
+
+;; Default value to return if key not found
+(get {:a 0 :b 1} :c "unicorns?")
+; => "unicorns?"
+
+;; Get function `:a` and sum the numbers `1``2``3`
+((get {:a + :b -} :a) 1 2 3)
+
+;; Get values in nested maps
+(get-in {:a 0 :b {:c "ho hum"}} [:b :c])
+; => "hu hum"
+
+;; Treat the map like a function
+({:name "The Human Coffeepot"} :name)
+; => "The Human Coffeepot"
+
+;; The same with nested values - ( (`map` :parent) :child)
+(({:a 0 :b {:c "ho hum"}} :b) :c)
+; => "hu hum"
+
+;; Define a map and bind it to a variable
+(def mathy
+  (hash-map
+   :a +
+   :b -))
+
+;; Get function `:a` and sum the numbers `1``2``3`
+((mathy :a) 1 2 3)
+; => 6
+
+(map inc [1 2 3])
+; => (2 3 4)
+
+;; Multiple Collections
+(map str ["a" "b" "c"] ["A" "B" "C"])
+; => ("aA" "bB" "cC")
+
+;; The same as:
+(list (str "a" "A") (str "b" "B") (str "c" "C"))
+
+;; Maps
+(def human-consumption   [8.1 7.3 6.6 5.0])
+(def critter-consumption [0.0 0.2 0.3 1.1])
+(defn unify-diet-data
+  [human critter]
+  {:human human
+   :critter critter})
+
+(map unify-diet-data human-consumption critter-consumption)
+; => ({:human 8.1, :critter 0.0}
+      {:human 7.3, :critter 0.2}
+      {:human 6.6, :critter 0.3}
+      {:human 5.0, :critter 1.1})
+
+;; Pass collection of functions as map
+(def sum #(reduce + %))
+(def avg #(/ (sum %) (count %)))
+(defn stats
+  [numbers]
+  (map #(% numbers) [sum count avg]))
+
+(stats [3 4 10])
+; => (17 3 17/3)
+
+(stats [80 1 44 13 6])
+; => (144 5 144/5)
+
+
+
+      #+END_SRC
+**** Operators
+***** Reduce
+      #+BEGIN_SRC clojure
+
+;; The first use is to transform a map’s values, producing a new map
+;; with the same keys but with updated values
+(reduce (fn [new-map [key val]]
+          (assoc new-map key (inc val)))
+        {}
+        {:max 30 :min 10})
+; => {:max 31, :min 11}
+
+
+      #+END_SRC
+
+*** Introduction
+**** Forms
+    #+BEGIN_SRC clojure
+
+;; In clojure, the expressions are called `forms`
+;; Example of valid forms
+1
+"a string"
+["a" "vector"]
+
+;; Operations
+(operator operand 1 .... n)
+
+;; String concatenation
+(srt "First string " "and second string")
+
+    #+END_SRC
+
+**** If Then Else
+    #+BEGIN_SRC clojure
+
+;; If
+(if true ;; If
+  "By Zeus' hammer!" ;; Then
+  "By Aquaman's trident!") ;; Else [optional]
+; => "By Zeus's hammer!"
+
+(if false ;; If
+  "By Zeus' hammer!" ;; Then
+  "By Aquaman's trident!") ;; Else [optional]
+; => "By Aquaman's trident!"
+
+;; Optional Else
+(if false
+  "By Odin's Elbow!")
+; => nil
+
+
+;; Only allows one function per form
+;; (if true
+;; (this)
+;; (that))
+;; ERROR
+(if true
+  (do (println "Success! (if form)")
+      "By Zeus' hammer!")
+  (do (println "Failure!")
+      "By Aquaman's trident!"))
+; => Success! ;; Print
+; => "By Aquaman's trident!" ;; Return
+
+    #+END_SRC
+
+**** When
+    #+BEGIN_SRC clojure
+
+;; When - the same as if but with no else
+(when true
+  (println "Success! (when form)")
+  "abra cadabra")
+; if false: returns => nil
+
+    #+END_SRC
+
+**** Loop
+     #+BEGIN_SRC clojure
+
+;; Create a loop
+;; It’s as if `loop` creates an anonymous function with a parameter named
+;; `iteration`, and `recur` allows you to call the function from within
+;; itself, passing the argument (inc iteration)
+(loop [iteration 0] ;; variable `iteration` with default value 0
+  (println (str "Iteration " iteration))
+
+  ;; Check if its greater than 3
+  (if (> iteration 3)
+    (println "Goodbye!")
+
+    ;; Else: recur the loop with `iteration` + 1
+    (recur (inc iteration))))
+; => Iteration 0
+; => Iteration 1
+; => Iteration 2
+; => Iteration 3
+; => Iteration 4
+; => Goodbye!
+
+;; The same
+(defn recursive-printer
+  ([]
+     (recursive-printer 0))
+  ([iteration]
+     (println iteration)
+     (if (> iteration 3)
+       (println "Goodbye!")
+       (recursive-printer (inc iteration)))))
+(recursive-printer)
+; => Iteration 0
+; => Iteration 1
+; => Iteration 2
+; => Iteration 3
+; => Iteration 4
+; => Goodbye!
+
+
+     #+END_SRC
+
+**** Truthiness and Falsiness
+     #+BEGIN_SRC clojure
+
+;; In clojure everything is = true, except `nil` and `false`
+(if "bears eat beets"
+  "bears beets Battlestar Galactica")
+; => "bears beets Battlestar Galactica"
+
+(if nil
+  "This won't be the result because nil is falsey"
+  "nil is falsey")
+; => "nil is falsey"
+
+;; Equality Operator
+(= nil nil)
+; => true
+
+(= 1 1)
+; => true
+
+(= 1 2)
+; => false
+
+     #+END_SRC
+
+**** Operators
+     #+BEGIN_SRC clojure
+
+;; Equality
+(= 1 1)
+; => true
+
+;; `Or` operator
+(or false nil :large_I_mean_venti :why_cant_I_just_say_large)
+; => :large_I_mean_venti ;; false is false => true, so it returns the first
+
+(or (= 0 1) (= "yes" "no"))
+; => false ;; both are false, so it returns the last value
+; the last value is false (the equality is not true)
+
+(or nil)
+; => nil ;; returns the last value
+
+;; `And` operator
+(and :free_wifi :hot_coffee)
+; => :hot_coffee ;; returns the `last` `truthly` value
+
+(and :feelin_super_cool nil false)
+; => nil ;; returns the `first` `falsey` value
+
+     #+END_SRC
+
+**** Variables
+     #+BEGIN_SRC clojure
+
+;; Naming values
+;; In other languages it is called assining a value to a variable
+;; In clojure it is called `binding`
+
+;; `def` should be treated as `CONSTANT` variables
+(def failed-protagonist-names
+"This is a `vector` with strings"
+["Larry Potter" "Doreen the Explorer" "The Incredible Bulk"])
+
+failed-protagonist-names
+
+;; `OBJECTIVE`: Do not bind values to a variable, because it makes it harder to understand
+;; # Instead of this:
+;; severity = "mild"
+;; error_message = "OH GOD! IT'S A DISASTER! WE'RE "
+;; if severity == "mild":
+;;     error_message = error_message + "MILDLY INCONVENIENCED!"
+;; else:
+;;     error_message = error_message + "DOOOOOOOOOOMED!"
+
+;; Do `this`:
+(defn error-message
+  [severity] ;; the argument
+  (str "OH GOD! IT'S A DISASTER! WE'RE " ;; join strings
+       (if (= severity :mild) ;; if equal to `:mild`
+         "MILDLY INCONVENIENCED!" ;; return this to the str
+         "DOOOOOOOOOOMED!")
+       " The argument was: "
+       severity)) ;; else return this to the str
+
+(error-message :mild)
+(error-message :light)
+
+     #+END_SRC
+
+**** Data Structures
+***** Integer, Float, Ratio and String
+     #+BEGIN_SRC clojure
+
+;; It is not possible to reassign or change already defined variables
+;; Example:
+;; failed_protagonist_names = [
+;;   "Larry Potter",
+;;   "Doreen the Explorer",
+;;   "The Incredible Bulk"
+;; ]
+;; failed_protagonist_names[0] = "Gary Potter"
+;;
+;; failed_protagonist_names
+;; # => [
+;; #   "Gary Potter",
+;; #   "Doreen the Explorer",
+;; #   "The Incredible Bulk"
+;; # ]
+
+;; Integer
+93
+
+;; Float
+1.2
+
+;; Ratio
+1/3
+
+;; String
+"Lord Voldemort"
+"\"He who must not be names\""
+"\"Great cow of Moscow!\" - Hermes Conrad" ;; `"` inside a string must be slashed
+
+;; String interpolation doesn't exist in `Clojure`
+;; String concatenation
+(def name "Chewbacca")
+(str "\"Uggllglglglglglglglll\" - " name)
+; => "Uggllglglglglglglglll" - Chewbacca
+
+     #+END_SRC
+
+***** Maps
+      #+BEGIN_SRC clojure
+
+;; Maps
+{} ;; empty
+;; `:key` and `value`
+{:first-name "Charlie"
+ :last-name "McFishwich"}
+
+;; Binding `+` function to a variable
+{"string-key" +}
+
+;; Nested Maps
+{:name {:first "John"
+        :middle "Jacob"
+        :last "Jingleheimerschmidt"}}
+
+;; map values can be of any type, even functions
+{:summy + :subtracty -}
+
+;; Hash-map creates a map
+(hash-map :a 1 :b 2)
+
+;; Get the values of a `key`
+(get {:a 0 :b 1} :b)
+; => 1
+
+(get {:a 0 :b {:c "ho hum"}} :b)
+; => {:c "hu hum"}
+
+;; Get returns `nill` if there isnt a key
+(get {:a 0 :b 1} :c)
+; => nil
+
+;; Default value to return if key not found
+(get {:a 0 :b 1} :c "unicorns?")
+; => "unicorns?"
+
+;; Get function `:a` and sum the numbers `1``2``3`
+((get {:a + :b -} :a) 1 2 3)
+
+;; Get values in nested maps
+(get-in {:a 0 :b {:c "ho hum"}} [:b :c])
+; => "hu hum"
+
+;; Treat the map like a function
+({:name "The Human Coffeepot"} :name)
+; => "The Human Coffeepot"
+
+;; The same with nested values - ( (`map` :parent) :child)
+(({:a 0 :b {:c "ho hum"}} :b) :c)
+; => "hu hum"
+
+;; Define a map and bind it to a variable
+(def mathy
+  (hash-map
+   :a +
+   :b -))
+
+;; Get function `:a` and sum the numbers `1``2``3`
+((mathy :a) 1 2 3)
+; => 6
+
+(map inc [1 2 3])
+; => (2 3 4)
+
+;; Multiple Collections
+(map str ["a" "b" "c"] ["A" "B" "C"])
+; => ("aA" "bB" "cC")
+
+;; The same as:
+(list (str "a" "A") (str "b" "B") (str "c" "C"))
+
+      #+END_SRC
+
+***** Vectors
+      #+BEGIN_SRC clojure
+
+;; Similar to array
+[3 2 1]
+
+;; Get element by index
+(get [3 2 1] 0)
+; => 3
+
+;; Get element by index
+(get ["a" {:name "Pugsley Winterbottom"} "c"] 1)
+; => {:name "Pugsley Winterbottom"}
+
+;; Create vector
+(vector "creepy" "full" "moon")
+; => ["creepy" "full" "moon"]
+
+;; Add element to the end of a `vector`
+(conj [1 2 3] 4)
+; => [1 2 3 4]
+
+;; Create a vector function
+(defn create-vector
+  "Creates a vector with all `args`
+  Returns a vector"
+  [& args]
+  vector args)
+
+(create-vector 1 2 3 4 5)
+; => [1 2 3 4 5]
+
+(create-vector 1 2 3 4 5 6 7 8 9)
+; => [1 2 3 4 5 6 7 8 9]
+
+(create-vector 1 2)
+; => [1 2]
+
+      #+END_SRC
+
+***** Lists
+      #+BEGIN_SRC clojure
+
+;; When should you use a list and when should you use a vector?
+;; A good rule of thumb is that if you need to easily add items to the
+;; beginning of a sequence or if you’re writing a macro, you should use a list.
+;; Otherwise, you should use a vector.
+
+;; Lists are similar to vectors - linear collection of values
+;; Can't return elements with get, must use `nth`
+;; It is slower to use `nth` over `get`
+;; Clojure has to traverse all n elements of a list to get to the nth,
+;; whereas it only takes a few hops at most to access a vector element by its index
+
+;; Must be defined with a `'` so the REPL won't evaluate it as a function
+'(1 2 3 4)
+; => (1 2 3 4)
+
+;; Return an element
+(nth '(:a :b :c) 0)
+; => :a
+
+;; Return an element
+(nth '(:a :b :c) 2)
+; => :c
+
+;; Create a list
+(list 1 "two" {3 4})
+; => (1 "two" {3 4})
+
+;; Adding new elements
+;; It is added to the beggining of the list - contrary to what happens with vectors
+(conj '(1 2 3) 4)
+; => (4 1 2 3)
+
+
+      #+END_SRC
+
+***** Sets
+      #+BEGIN_SRC clojure
+
+;; Two types of sets: `hash-sets` and `sorted-sets`
+;; Sets are collections of `unique` values
+
+;; Hash-sets
+#{"kurt vonnegut" 20 :icicle}
+
+;; Create a hash-set
+(hash-set 1 1 2 2)
+; => #{1 2}
+
+;; Add a value to the hash-set
+;; Multiple instances of a value become one value only
+;; If the set already has that value, it wont add it again
+(conj #{:a :b} :b)
+; => #{:b :a}
+
+;; Add a value to the hash-set
+(conj #{:a :b} :c)
+; => #{:c :b :a}
+
+;; Creating a set from a vector
+;; This means obtaining a vector of unique values
+(set [3 3 3 4 4])
+; => {3 4}
+
+;; The same for lists
+(set '(1 2 3 3 4 5))
+; => #{1 4 3 2 5}
+
+;; Get element of hash-map
+;; If the element is in the set, it returns it
+(get #{:a :b} :a)
+; => :a
+
+;; It searched for `nil`, `nil` is in the set, so it returns it
+(get #{:a nil} nil)
+; => nil
+
+(get #{:a :b} "kurt vonnegut")
+; => nil
+
+;; Check `membership` - if it is in the set
+;; If it is, returns `true`, if not, returns `false`
+(contains? #{:a :b} :a)
+; => true
+
+;; Check `membership` - if it is in the set
+(contains? #{:a :b} 3)
+; => false
+
+;; Check `membership` - if it is in the set
+(contains? #{nil} nil)
+; => true
+
+;; Use keyword to get the element
+(:a #{:a :b})
+; => :a
+
+;; Creates a set in inserts it into a vector
+(into [] (set [:a :a]))
+; => [:a]
+
+
+     #+END_SRC
+
+**** Keywords
+     #+BEGIN_SRC clojure
+
+;; Usually used in `maps`
+;; Example keywords
+:a
+:rumplestiltsken
+:34
+:_?
+
+;; Used as functions to look up values in maps
+(:a {:a 1 :b 2 :c 3})
+; => 1
+
+;; Equivalent to
+(get {:a 1 :b 2 :c 3} :a)
+
+;; Default value for when not found
+(:d {:a 1 :b 2 :c 3} "No gnome knows homes like Noah knows")
+; => "No gnome knows homes like Noah knows"
+
+
+
+     #+END_SRC
+
+**** Functions
+     #+BEGIN_SRC clojure
+
+;; Functions
+(+ 1 2 3 4)
+(* 1 2 3 4)
+(first [1 2 3 4])
+
+;; Function - returns `+` because it returns the first truthly value
+(or + -)
+; => #<core$_PLUS_ clojure.core$_PLUS_@76dace31>
+
+;; Example of `or` function
+((or + -) 1 2 3)
+; => 6
+
+;; It returns the last truthly value `+`
+((and (= 1 1) +) 1 2 3)
+; => 6
+
+;; The first element of the vector is the `+`
+((first [+ 0]) 1 2 3)
+; => 6
+
+;; NOT VALID
+;; `Strings` and `numbers` aren't functions
+(1 2 3 4)
+("test" 1 2 3)
+
+;; Functions that can either take a function as an argument or return a
+;; function are called `higher-order` functions
+
+;; `map` function creates a new list, by applying a function to each member of a
+;; collection.
+;; `inc` function increments a number by 1
+;; It doesn't return a vector
+(map inc [0 1 2 3])
+; => (1 2 3 4)
+;; `map` allows you to generalize the process of transforming a collection by
+;; applying a function—any function—over any collection.
+
+;; How function call works
+(+ (inc 199) (/ 100 (- 7 2)))
+(+ 200 (/ 100 (- 7 2))) ; evaluated "(inc 199)"
+(+ 200 (/ 100 5)) ; evaluated (- 7 2)
+(+ 200 20) ; evaluated (/ 100 5)
+220 ; final evaluation
+;; all subforms are evaluated before applying the + function
+
+     #+END_SRC
+
+**** Function Calls, Macro Calls and Special Forms
+     #+BEGIN_SRC clojure
+
+;; Special Forms: `def` and `if`
+;; the main feature that makes special forms “special” is that, unlike
+;; function calls, they don’t always evaluate all of their operands
+(if boolean-form ;; if true then
+  then-form ;; this
+  optional-else-form) ;; else this
+
+     #+END_SRC
+
+***** Functions
+      *All Functions Are Created Equal*
+
+      One final note: Clojure has no privileged functions.
+      "+" is just a function, "-" is just a function, and inc and map are just
+      functions. They’re no better than the functions you define yourself.
+      So don’t let them give you any lip!
+
+      More important, this fact helps demonstrate Clojure’s underlying
+      simplicity. In a way, Clojure is very dumb. When you make a function
+      call, Clojure just says, “map? Sure, whatever! I’ll just apply this and
+      move on.” It doesn’t care what the function is or where it came from;
+      it treats all functions the same. At its core, Clojure doesn’t give two
+      burger flips about addition, multiplication, or mapping. It just cares
+      about applying functions.
+
+      As you continue to program with Clojure, you’ll see that this simplicity is
+      ideal. You don’t have to worry about special rules or syntax for working
+      with different functions. They all work the same!
+
+****** Defining
+      #+BEGIN_SRC clojure
+
+;; How to define a `function`
+;; 1. `defn`
+;; 2. function `name`
+;; 3. `docstring` (optional)
+;; 4. `parameters` listed in brackets
+;; 5. function `body`
+
+(defn too-enthusiastic
+"Return a cheer that might be a bit too enthusiastic"
+[name]
+(str "OH. MY. GOD! " name " YOU ARE MOST DEFINITELY LIKE THE BEST "
+"MAN SLASH WOMAN EVER I LOVE YOU AND WE SHOULD RUN AWAY SOMEWHERE"))
+
+(too-enthusiastic "Zelda")
+; => "OH. MY. GOD! Zelda YOU ARE MOST DEFINITELY LIKE THE BEST MAN
+; => SLASH WOMAN EVER I LOVE YOU AND WE SHOULD RUN AWAY SOMEWHERE"
+
+;; To get the documentation of a function,
+(doc fn-name)
+
+;; The number of parameters in a function is called `arity`
+;; 0-arity
+(defn no-params
+  []
+  "I take no parameters!")
+
+;; 1-arity
+(defn one-param
+  [x]
+  (str "I take one parameter: " x))
+
+;; 2-arity
+(defn two-params
+  [x y]
+  (str "Two parameters! That's nothing! Pah! I will smoosh them "
+  "together to spite you! " x y))
+
+;; Functions also support arity overloading.
+;; This means that you can define a function so a different function body will
+;; run depending on the arity.
+(defn multi-arity
+  ;; 3-arity arguments and body
+  ([first-arg second-arg third-arg]
+     (do-things first-arg second-arg third-arg))
+  ;; 2-arity arguments and body
+  ([first-arg second-arg]
+     (do-things first-arg second-arg))
+  ;; 1-arity arguments and body
+  ([first-arg]
+     (do-things first-arg)))
+
+;; If no `chop-type` is provided, get the `name` arg and execute the function
+;; with `karate` as second argument
+(defn x-chop
+  "Describe the kind of chop you're inflicting on someone"
+  ([name chop-type]
+     (str "I " chop-type " chop " name "! Take that!"))
+  ([name]
+     (x-chop name "karate")))
+
+;; chop-type provided
+(x-chop "Kanye West" "slap")
+; => "I slap chop Kanye West! Take that!"
+
+;; chop-type not provided
+(x-chop "Kanye East")
+; => "I karate chop Kanye East! Take that!"
+
+;; Each arity might do something completely unrelated
+(defn weird-arity
+  ([] ;; If no arguments, return this weird string
+     "Destiny dressed you this morning, my friend, and now Fear is
+     trying to pull off your pants. If you give up, if you give in,
+     you're gonna end up naked with Fear just standing there laughing
+     at your dangling unmentionables! - the Tick")
+  ([number] ;; If number, add plus 1
+     (inc number)))
+
+;; variable-arity
+;; may have unlimited number of arguments
+(defn codger-communication
+  "Return a string with a name"
+  [whippersnapper]
+  (str "Get off my lawn, " whippersnapper "!!!"))
+
+(defn codger
+  "run `codger-communication` for each argument provided and return a map with all"
+  [& whippersnappers]
+  (map codger-communication whippersnappers))
+
+;; Providing 3 arguments
+(codger "Billy" "Anne-Marie" "The Incredible Bulk")
+; => ("Get off my lawn, Billy!!!"
+; =>  "Get off my lawn, Anne-Marie!!!"
+; =>  "Get off my lawn, The Incredible Bulk!!!")
+
+;; It is possible to mix arguments with variable-arity functions
+;; but `& args` must come last
+(defn favorite-things
+  [name & things]
+  (str "Hi, " name ", here are my favorite things: "
+       (clojure.string/join ", " things)))
+
+(favorite-things "Doreen" "gum" "shoes" "kara-te")
+; => "Hi, Doreen, here are my favorite things: gum, shoes, kara-te"
+
+      #+END_SRC
+
+****** Deconstructing
+       In general, you can think of destructuring as instructing Clojure
+       on how to associate names with values in a list, map, set, or vector.
+
+       #+BEGIN_SRC clojure
+
+;; The basic idea behind destructuring is that it lets you concisely bind names
+;; to values within a collection.
+;; Here, the `my-first` function associates the symbol `first-thing` with the first
+;; element of the vector that was passed in as an argument. You tell `my-first`
+;; to do this by placing the symbol `first-thing` within a vector.
+
+;; Return the first element of a collection
+(defn my-first
+  [[first-thing]] ; Notice that first-thing is within a vector
+  first-thing)
+
+(my-first ["oven" "bike" "war-axe"])
+; => "oven"
+
+;; That vector is like a huge sign held up to Clojure that says, “Hey! This
+;; function is going to receive a list or a vector as an argument. Make my life
+;; easier by taking apart the argument’s structure for me and associating
+;; meaningful names with different parts of the argument!”
+;; When destructuring a vector or list, you can name as many elements as you
+;; want and also use `rest` parameters
+(defn chooser
+  [[first-choice second-choice & unimportant-choices]]
+  (println (str "Your first choice is: " first-choice))
+  (println (str "Your second choice is: " second-choice))
+  (println (str "We're ignoring the rest of your choices. "
+                "Here they are in case you need to cry over them: "
+                (clojure.string/join ", " unimportant-choices))))
+
+(chooser ["Marmalade", "Handsome Jack", "Pigpen", "Aquaman"])
+; => Your first choice is: Marmalade
+; => Your second choice is: Handsome Jack
+; => We're ignoring the rest of your choices. Here they are in case \
+; => you need to cry over them: Pigpen, Aquaman
+
+;; Here, the rest parameter `unimportant-choices` handles any number of additional
+;; choices from the user after the first and second.
+
+;; You destructure maps by providing a map as a parameter
+(defn announce-treasure-location
+  [{lat :lat lng :lng}]
+  (println (str "Treasure lat: " lat))
+  (println (str "Treasure lng: " lng)))
+
+;; Yo! Clojure! Do me a flava and associate the name `lat` with the value
+;; corresponding to the key `:lat`. Do the same thing with `lng` and `:lng`, okay?
+(announce-treasure-location {:lat 28.22 :lng 81.33})
+; => Treasure lat: 100
+; => Treasure lng: 50
+
+;; We often want to just break keywords out of a map, so there’s a shorter
+;; syntax for that.
+(defn announce-treasure-location
+  [{:keys [lat lng]}]
+  (println (str "Treasure lat: " lat))
+  (println (str "Treasure lng: " lng)))
+
+(announce-treasure-location {:lat 28.22 :lng 81.33})
+
+;; You can retain access to the original map argument by using the :as keyword.
+(defn receive-treasure-location
+  [{:keys [lat lng] :as treasure-location}]
+  (println (str "Treasure lat: " lat))
+  (println (str "Treasure lng: " lng))
+
+  ;; One would assume that this would put in new coordinates for your `ship` function
+  ;; change it to (str "steer-ship! to " treasure-location) to return as string
+  (steer-ship! treasure-location))
+
+(receive-treasure-location {:lat 28.22 :lng 81.33})
+
+       #+END_SRC
+
+****** Function Body
+       #+BEGIN_SRC clojure
+
+;; The function body can contain forms of any kind. Clojure automatically
+;; returns the last form evaluated. This function body contains just three forms,
+;; and when you call the function, it spits out the last form, "joe"
+(defn illustrative-function
+  []
+  (+ 1 304)
+  30
+  "joe")
+
+(illustrative-function)
+; => "joe"
+
+;; Function with `if` statement
+(defn number-comment
+  [x]
+  (if (> x 6)
+    "Oh my gosh! What a big number!"
+    "That number's OK, I guess"))
+
+(number-comment 5)
+; => "That number's OK, I guess"
+
+(number-comment 7)
+; => "Oh my gosh! What a big number!"
+
+
+
+
+
+       #+END_SRC
+
+****** Anonymous Functions
+       #+BEGIN_SRC clojure
+
+;; If you need to write a simple anonymous function, using this style is best
+;; because it’s visually compact. On the other hand, it can easily become
+;; unreadable if you’re writing a longer, more complex function. If that’s the
+;; case, use `fn`
+
+;; `defn` means define a `fn` funtion to a variable
+(def my-special-multiplier (fn [x] (* x 3)))
+(my-special-multiplier 12)
+; => 36
+
+;; Anonymous Functions don't have names
+(fn [param-list]
+  function body)
+
+(map (fn [name] (str "Hi, " name))
+     ["Darth Vader" "Mr. Magoo"])
+; => ("Hi, Darth Vader" "Hi, Mr. Magoo")
+
+((fn [x] (* x 3)) 8)
+; => 24
+
+;; Function call
+(* 8 3)
+
+;; Anonymous Function
+(#(* % 3) 8)
+; => 24
+
+;; Passing an anonymous funtion to a map
+(map #(str "Hi, " %)
+     ["Darth Vader" "Mr. Magoo"])
+; => ("Hi, Darth Vader" "Hi, Mr. Magoo")
+
+;; `%` - `identity` function - passes an argument to the function,
+;; you can have as many `identity` functions as you want
+;; `%1` `%2` ... `%n`, `%` behaves as `%1`
+(#(str %1 " and " %2) "cornbread" "butter beans")
+; => "cornbread and butter beans"
+
+;; Pass the `rest` parameter as `%&`
+;; `rest` arguments are stored as `lists`
+(#(identity %&) 1 "blarg" :yip)
+; => (1 "blarg" :yip)
+
+       #+END_SRC
+
+****** Returning Functions
+       #+BEGIN_SRC clojure
+
+;; By now you’ve seen that functions can return other functions. The returned
+;; functions are closures, which means that they can access all the variables
+;; that were in scope when the function was created. Here’s a standard example
+
+(defn inc-maker
+  "Create a custom incrementor"
+  [inc-by]
+  ;; Anonymous function that takes ´%1´ and an argument to increment
+  #(+ % inc-by))
+
+;; Define inc-maker to increment by 3
+(def inc3 (inc-maker 3))
+
+;; Call inc3 with the identity 7
+(inc3 7)
+; => 10
+
+       #+END_SRC
+
+***** Let
+      let forms have two main uses. First, they provide clarity by allowing
+      you to name things. Second, they allow you to evaluate an expression
+      only once and reuse the result. This is especially important when you
+      need to reuse the result of an expensive function call, like a network API
+      call. It’s also important when the expression has side effects.
+
+      #+BEGIN_SRC clojure
+
+;; `let` binds names to values, like `def`. You can think of let as short for
+;; let it be, which is also a beautiful Beatles song about programming.
+;; Notice that the value of a let form is the last form in its body that is
+;; evaluated.
+(let [x 3] ;; Bind 3 to `x`
+  x) ;; Return `x`
+; => 3
+
+;; Global Variable
+(def x 0)
+
+;; Local Variable
+;; I want x to be 0 in the global context, but within the context of this let
+;; expression, it should be 1 - `scope`.
+(let [x 1] ;; bind `x` to `1`
+  x) ;; Return
+; => 1
+
+;; Access a global variable
+;; as it is not defined a new value, it uses the existant bindins
+(let [x (inc x)] ;; bind `x` to (inc x) `increment`
+  x) ;; return the new `x`
+; => 1
+
+;; Bind the `first` and `rest` elements in the list and return them
+(let [[pongo & dalmatians] dalmatian-list]
+  [pongo dalmatians]) ;; return a vector with the first and then the rest elements
+; => ["Pongo" ("Perdita" "Puppy 1" "Puppy 2")]
+
+
+(def dalmatian-list
+  ["Pongo" "Perdita" "Puppy 1" "Puppy 2"])
+
+;; Bind dalmatians to the result of the expression
+(let [dalmatians (take 2 dalmatian-list)] ;; takes 2 elements from vector, return `dalmatians`
+  dalmatians) ;; return the list
+; => ("Pongo" "Perdita")
+
+      #+END_SRC
+
+***** Regural Expressions
+      #+BEGIN_SRC clojure
+
+;; Define a regular expression
+#"regural-expression"
+
+;; Search using regular expression
+
+;; Regular-expression: replace strings starting `^` with `left-`
+;; and replace it with `right-`, something like `cleft-chin` won't be returned
+;; it will return the match or nil
+(re-find #"^left-" "left-eye")
+; => "left-"
+
+(re-find #"^left-" "cleft-chin")
+; => nil
+
+(re-find #"^left-" "wongleblart")
+; => nil
+
+(defn matching-part
+  [part]
+  {:name (clojure.string/replace (:name part) #"^left-" "right-")
+   :size (:size part)})
+
+(matching-part {:name "left-eye" :size 1})
+; => {:name "right-eye" :size 1}]
+
+(matching-part {:name "head" :size 3})
+; => {:name "head" :size 3}]
+
+(matching-part {:name "cleft-chin" :size 3})
+; => {:name "cleft-chin" :size 3}]
+
+
+      #+END_SRC
+
+**** Project: Shire's Next Top Model
+     Okay! It's time to use your newfound knowledge for a noble purpose:
+     smacking around hobbits! To hit a hobbit, you’ll first model its body
+     parts. Each body part will include its relative size to indicate how
+     likely it is that that part will be hit. To avoid repetition,
+     the hobbit model will include only entries for left foot, left ear,
+     and so on. Therefore, you’ll need a function to fully symmetrize the
+     model, creating right foot, right ear, and so forth. Finally, you’ll
+     create a function that iterates over the body parts and randomly chooses
+     the one hit. Along the way, you’ll learn about a few new Clojure tools:
+     let expressions, loops, and regular expressions. Fun!
+
+***** *The Shire’s Next Top Model*
+
+      For our hobbit model, we’ll eschew such hobbit characteristics as
+      joviality and mischievousness and focus only on the hobbit’s tiny body.
+      Here’s the hobbit model:
+
+      file:../files/image_141.png
+
+      #+BEGIN_SRC clojure
+
+;; The left part of a `Hobbit`!
+;; This is a vector of maps. Each map has the name of the body part and relative
+;; size of the body part. (I know that only anime characters have eyes one-third
+;; the size of their head, but just go with it, okay?)
+;; Conspicuously missing is the hobbit’s right side. Let’s fix that. Listing 3-1
+;; is the most complex code you’ve seen so far, and it introduces some new ideas.
+;; But don’t worry, because we’ll examine it in great detail.
+(def asym-hobbit-body-parts [{:name "head" :size 3}
+                             {:name "left-eye" :size 1}
+                             {:name "left-ear" :size 1}
+                             {:name "mouth" :size 1}
+                             {:name "nose" :size 1}
+                             {:name "neck" :size 2}
+                             {:name "left-shoulder" :size 3}
+                             {:name "left-upper-arm" :size 3}
+                             {:name "chest" :size 10}
+                             {:name "back" :size 10}
+                             {:name "left-forearm" :size 3}
+                             {:name "abdomen" :size 6}
+                             {:name "left-kidney" :size 1}
+                             {:name "left-hand" :size 2}
+                             {:name "left-knee" :size 2}
+                             {:name "left-thigh" :size 4}
+                             {:name "left-lower-leg" :size 3}
+                             {:name "left-achilles" :size 1}
+                             {:name "left-foot" :size 2}])
+
+;; Create a matching pairt of the hobbit
+(defn matching-part
+  "It takes a part `left` and creates a `right`"
+  [part]
+
+  ;; Regular-expression: replace strings starting `^` with `left-`
+  ;; and replace it with `right-`, something like `cleft-chin` won't be returned
+  ;; it will return the match or nil
+  {:name (clojure.string/replace (:name part) #"^left-" "right-")
+   :size (:size part)})
+
+;; Given a sequence (in this case, a vector of body parts and their sizes), the
+;; function continuously splits the sequence into a head and a tail. Then it
+;; processes the head, adds it to some result, and uses recursion to continue the
+;; process with the tail.
+(defn symmetrize-body-parts
+  "Expects a seq of maps that have a :name and :size"
+
+  ;; the `map` with the parts
+  [asym-body-parts]
+
+  ;; Bing the tail of `asym-body-parts` to `remaining-asym-parts`
+  ;; Innitially it is bound to the entire collection
+  ;; the result collection is `final-body-parts`
+  (loop [remaining-asym-parts asym-body-parts
+         final-body-parts []]
+
+    ;; If `remaining-asym-parts` is empty, then we already processed all the parts
+    ;; so, just return all the parts
+    (if (empty? remaining-asym-parts)
+      final-body-parts
+
+      ;; create a new scope, bind `part` to the first element
+      ;; on `remaining-asym-parts`
+      ;; Associate `remaining` with the rest of the elements in
+      ;; `remaining-asym-parts`.
+      (let [[part & remaining] remaining-asym-parts]
+        (recur remaining
+
+               ;; Then use the function `into` to add the elements of that set
+               ;; to the vector `final-body-parts`
+               (into final-body-parts
+
+                     ;; Use the `set` function to create a set consisting of
+                     ;; `part` and its matching part - sets only allow `unique`
+                     ;; values, sometimes the matching will be equalm for example:
+                     ;; `head`, `abdomen`
+                     (set [part (matching-part part)])))))))
+
+
+
+
+;; Get the full hobbit
+(symmetrize-body-parts asym-hobbit-body-parts)
+; => [{:name "head", :size 3}
+; =>  {:name "left-eye", :size 1}
+; =>  {:name "right-eye", :size 1}
+; =>  {:name "left-ear", :size 1}
+; =>  {:name "right-ear", :size 1}
+; =>  {:name "mouth", :size 1}
+; =>  {:name "nose", :size 1}
+; =>  {:name "neck", :size 2}
+; =>  {:name "left-shoulder", :size 3}
+; =>  {:name "right-shoulder", :size 3}
+; =>  {:name "left-upper-arm", :size 3}
+; =>  {:name "right-upper-arm", :size 3}
+; =>  {:name "chest", :size 10}
+; =>  {:name "back", :size 10}
+; =>  {:name "left-forearm", :size 3}
+; =>  {:name "right-forearm", :size 3}
+; =>  {:name "abdomen", :size 6}
+; =>  {:name "left-kidney", :size 1}
+; =>  {:name "right-kidney", :size 1}
+; =>  {:name "left-hand", :size 2}
+; =>  {:name "right-hand", :size 2}
+; =>  {:name "left-knee", :size 2}
+; =>  {:name "right-knee", :size 2}
+; =>  {:name "left-thigh", :size 4}
+; =>  {:name "right-thigh", :size 4}
+; =>  {:name "left-lower-leg", :size 3}
+; =>  {:name "right-lower-leg", :size 3}
+; =>  {:name "left-achilles", :size 1}
+; =>  {:name "right-achilles", :size 1}
+; =>  {:name "left-foot", :size 2}
+; =>  {:name "right-foot", :size 2}]
+
+;; Using `reduce` is also more expressive. If readers of your code encounter `loop`,
+;; they won’t be sure exactly what the loop is doing without reading all of the code.
+;; But if they see `reduce`, they’ll immediately know that the purpose of the code is
+;; to process the elements of a collection to build a result.
+;; Use reduce to process the collection
+(defn better-symmetrize-body-parts
+  "Expects a seq of maps that have a :name and :size"
+  [asym-body-parts]
+
+  ;; create a anonymous function that takes two arguments and gets the `part`
+  ;; into the `final-body-parts` vector
+  (reduce (fn [final-body-parts part]
+            (into final-body-parts (set [part (matching-part part)])))
+
+          ;; initialize `final-body-parts` as empty vector
+          []
+
+          ;; pass `asym-body-parts` from function
+          asym-body-parts))
+
+(better-symmetrize-body-parts asym-hobbit-body-parts)
+
+;; `hit` works by taking a vector of asymmetrical body parts, symmetrizing it at ➊, and then
+;; summing the sizes of the parts at ➋. Once we sum the sizes, it’s like each number from 1
+;; through `body-part-size-sum` corresponds to a body part; 1 might correspond to the left eye,
+;; and 2, 3, 4 might correspond to the head. This makes it so when you hit a body part (by
+;; choosing a random number in this range), the likelihood that a particular body part is hit
+;; will depend on the size of the body part.
+;; Finally, one of these numbers is randomly chosen, and then we use loop at ➌ to find
+;; and return the body part that corresponds to the number. The loop does this by keeping
+;; track of the accumulated sizes of parts that we’ve checked and checking whether the
+;; accumulated size is greater than the target.
+(defn hit
+  [asym-body-parts]
+
+  ;; (1)
+  (let [sym-parts (better-symmetrize-body-parts asym-body-parts)
+
+        ;; (2)
+        body-part-size-sum (reduce + (map :size sym-parts))
+        target (rand body-part-size-sum)]
+
+    ;; (3)
+    (loop [[part & remaining] sym-parts
+           accumulated-size (:size part)]
+      (if (> accumulated-size target)
+        part
+        (recur remaining (+ accumulated-size (:size (first remaining))))))))
+
+;; Hit tha `Hobbit`
+(hit asym-hobbit-body-parts)
+; => {:name "right-upper-arm", :size 3}
+
+(hit asym-hobbit-body-parts)
+; => {:name "chest", :size 10}
+
+(hit asym-hobbit-body-parts)
+; => {:name "left-eye", :size 1}
+
+      #+END_SRC
+
+**** TODO Exercises
+     1. Use "str, vector, list, hash-map and hash-set" functions
+     2. Write a function that takes a number and adds 100 to it
+     3. Write a function, dec-maker, that works exactly like the function inc-maker
+        except with subtraction
+     4. Write a function, mapset, that works like map except the return value is a set
+     5. Create a function that’s similar to symmetrize-body-parts except that it has
+        to work with weird space aliens with radial symmetry. Instead of two eyes, arms,
+        legs, and so on, they have five
+     6. Create a function that generalizes symmetrize-body-parts and the function you
+        created in Exercise 5. The new function should take a collection of body parts
+        and the number of matching body parts to add. If you’re completely new to Lisp
+        languages and functional programming, it probably won’t be obvious how to do this.
+        If you get stuck, just move on to the next chapter and revisit the problem later
+
+     #+BEGIN_SRC clojure
+
+;; ===== Exercise 1
+;; str
+(str "This" " is " "a" " string!")
+
+;; vector
+[1 2 3 4 "five"]
+(vector 1 2 3 4)
+
+;; list to vector
+(vec '(1 2 3 4))
+
+;; list
+'("a" "list" "one" 1)
+
+;; hash-map
+{:a :b}
+
+(hash-map :a :b)
+
+;; Create a hash-set
+(hash-set 1 1 2 2)
+; => #{1 2}
+
+;; Creating a set from a vector
+;; This means obtaining a vector of unique values
+(set [3 3 3 4 4])
+; => {3 4}
+
+;; The same for lists
+(set '(1 2 3 3 4 5))
+; => #{1 4 3 2 5}
+
+;; ===== Exercise 2
+;; Hypotheses 1
+(defn add-100
+  [n]
+  (+ n 100))
+
+(add-100 32)
+
+;; Hypotheses 2
+(defn add-whatever
+  [add-by]
+  ;; Create an anonymous function that takes one identity argument and a `add-by`
+  #(+ %1 add-by))
+
+(def add-100
+  (add-whatever 100))
+
+(add-100 9)
+
+;; ===== Exercise 3
+(defn dec-maker
+  [dec-by]
+  #(- %1 dec-by))
+
+(def dec9
+  (dec-maker 9))
+
+(dec9 10)
+
+;; ===== Exercise 4
+(defn mapset
+  [some-func some-vec]
+  (into #{} (map some-func some-vec)))
+
+(mapset inc [1 1 2 2])
+
+;; ===== Exercise 4
+;; `NOT` `WORKING`
+(def asym-monster-body-parts [{:name "1-finger" :size 3}
+                              {:name "1-nail" :size 3}
+                              {:name "1-eye" :size 3}])
+
+;; Create a matching pairt of the hobbit
+(defn matching-part
+  "It takes a part `1` and creates the other 4"
+  [part]
+
+  ;; Regular-expression: replace strings starting `^` with `left-`
+  ;; and replace it with `right-`, something like `cleft-chin` won't be returned
+  ;; it will return the match or nil
+
+
+  (loop [part-count 1]
+      {:name (clojure.string/replace (:name part) #"^1-" (str part-count "-"))
+       :size (:size part)}
+      (recur (inc part-count))))
+
+(matching-part asym-monster-body-parts)
+
+     #+END_SRC
+
+*** Core Functions
+**** Introduction
+    As long as a data structure responds to the core sequence operations (the
+    functions first, rest, and cons, which we’ll look at more closely in a
+    moment), it will work with map, reduce, and oodles of other sequence
+    functions for free. This is what Clojurists mean by programming to
+    abstractions, and it’s a central tenet of Clojure philosophy.
+
+    I think of abstractions as named collections of operations. If you can
+    perform all of an abstraction’s operations on an object, then that object
+    is an instance of the abstraction. I think this way even outside of
+    programming. For example, the battery abstraction includes the operation
+    “connect a conducting medium to its anode and cathode,” and the
+    operation’s output is electrical current. It doesn’t matter if the
+    battery is made out of lithium or out of potatoes. It’s a battery as long
+    as it responds to the set of operations that define battery.
+
+    Similarly, map doesn’t care about how lists, vectors, sets, and maps are
+    implemented. It only cares about whether it can perform sequence
+    operations on them. Let’s look at how map is defined in terms of the
+    sequence abstraction so you can understand programming to abstractions in
+    general.
+
+**** Treating Lists, Vectors, Sets and Maps as `Sequences`
+     If you think about the map operation independently of any programming
+     language, or even of programming altogether, its essential behavior is
+     to derive a new sequence y from an existing sequence x using a function
+     $ƒ$ such that $y1 = ƒ(x1), y2 = ƒ(x2), . . . yn = ƒ(xn)$. Figure 4-1
+     illustrates how you might visualize a mapping applied to a sequence.
+
+     file:../files/image_142.png
+
+     The term sequence here refers to a collection of elements organized in
+     linear order, as opposed to, say, an unordered collection or a graph
+     without a before-and-after relationship between its nodes. Figure 4-2
+     shows how you might visualize a sequence, in contrast to the other two
+     collections mentioned.
+
+
+     file:../files/image_143.png
+
+     Absent from this description of mapping and sequences is any mention of
+     lists, vectors, or other concrete data structures. Clojure is designed
+     to allow us to think and program in such abstract terms as much as
+     possible, and it does this by implementing functions in terms of data
+     structure abstractions. In this case, map is defined in terms of the
+     sequence abstraction. In conversation, you would say map, reduce, and
+     other sequence functions take a sequence or even take a ~seq~. In fact,
+     Clojurists usually use seq instead of sequence, using terms like seq
+     functions and the seq library to refer to functions that perform
+     sequential operations. Whether you use sequence or seq, you’re
+     indicating that the data structure in question will be treated as a
+     sequence and that what it actually is in its truest heart of hearts
+     doesn’t matter in this context.
+
+     If the core sequence functions first, rest, and cons work on a data
+     structure, you can say the data structure implements the sequence
+     abstraction. Lists, vectors, sets, and maps all implement the sequence
+     abstraction, so they all work with map, as shown here:
+
+     #+BEGIN_SRC clojure
+
+(defn titleize
+  [topic]
+  (str topic " for the Brave and True"))
+
+(map titleize ["Hamsters" "Ragnarok"])
+; => ("Hamsters for the Brave and True" "Ragnarok for the Brave and True")
+
+(map titleize '("Empathy" "Decorating"))
+; => ("Empathy for the Brave and True" "Decorating for the Brave and True")
+
+(map titleize #{"Elbows" "Soap Carving"})
+; => ("Elbows for the Brave and True" "Soap Carving for the Brave and True")
+
+(map #(titleize (second %)) {:uncomfortable-thing "Winking"})
+; => ("Winking for the Brave and True")
+
+     #+END_SRC
+
+**** First, Rest and Cons
+     In a linked list, nodes are linked in a linear sequence.
+
+     Here’s how you might create one in JavaScript. In this snippet, next is
+     null because this is the last node in the list
+
+     #+BEGIN_SRC javascript
+
+var node3 = {
+  value: "last",
+  next: null
+};
+
+// In this snippet, node2’s next points to node3, and node1’s next
+// points to node2; that’s the “link” in “linked list”:
+
+var node2 = {
+  value: "middle",
+  next: node3
+};
+
+var node1 = {
+  value: "first",
+  next: node2
+};
+
+     #+END_SRC
+
+     file:../files/image_144.png
+
+     You can perform three core functions on a linked list: first, rest, and
+     cons. first returns the value for the requested node, rest returns the
+     remaining values after the requested node, and cons adds a new node with
+     the given value to the beginning of the list. After those are
+     implemented, you can implement map, reduce, filter, and other seq
+     functions on top of them.
+
+     #+BEGIN_SRC javascript
+
+var first = function(node) {
+  return node.value;
+};
+
+var rest = function(node) {
+  return node.next;
+};
+
+var cons = function(newValue, node) {
+  return {
+    value: newValue,
+    next: node
+  };
+};
+
+first(node1);
+// => "first"
+
+first(rest(node1));
+// => "middle"
+
+first(rest(rest(node1)));
+// => "last"
+
+var node0 = cons("new first", node1);
+first(node0);
+// => "new first"
+
+first(rest(node0));
+// => "first"
+
+var map = function (list, transform) {
+  if (list === null) {
+    return null;
+  } else {
+    return cons(transform(first(list)), map(rest(list), transform));
+  }
+}
+
+// This function transforms the first element of the list and then calls
+// itself again on the rest of the list until it reaches the end (a null).
+// Let’s see it in action! In this example, you’re mapping the list that
+// begins with node1, returning a new list where the string " mapped!" is
+// appended to each node’s value. Then you’re using first to return the
+// first node’s value:
+first(
+  map(node1, function (val) { return val + " mapped!"})
+);
+
+// => "first mapped!"
+
+// So here’s the cool thing: because map is implemented completely in terms
+// of cons, first, and rest, you could actually pass it any data structure
+// and it would work as long as cons, first, and rest work on that data structure.
+var first = function (array) {
+  return array[0];
+}
+
+var rest = function (array) {
+  var sliced = array.slice(1, array.length);
+  if (sliced.length == 0) {
+    return null;
+  } else {
+    return sliced;
+  }
+}
+
+var cons = function (newValue, array) {
+  return [newValue].concat(array);
+}
+
+
+var list = ["Transylvania", "Forks, WA"];
+map(list, function (val) { return val + " mapped!"})
+// => ["Transylvania mapped!", "Forks, WA mapped!"]
+
+     #+END_SRC
+
+**** Seq Functions
+     Whenever Clojure expects a sequence—for example, when you call map,
+     first, rest, or cons—it calls the seq function on the data structure in
+     question to obtain a data structure that allows for first, rest, and
+     cons
+
+****** Map
+     #+BEGIN_SRC clojure
+
+(seq '(1 2 3))
+; => (1 2 3)
+
+(seq [1 2 3])
+; => (1 2 3)
+
+(seq #{1 2 3})
+; => (1 2 3)
+
+(seq {:name "Bill Compton" :occupation "Dead mopey guy"})
+; => ([:name "Bill Compton"] [:occupation "Dead mopey guy"])
+
+     #+END_SRC
+
+     There are two notable details here. First, seq always returns a value
+     that looks and behaves like a list; you’d call this value a sequence or
+     seq. Second, the seq of a map consists of two-element key-value vectors.
+     *That’s why map treats your maps like lists of vectors!* You can see this
+     in the "Bill Compton" example. I wanted to point out this example in
+     particular because it might be surprising and confusing. It was for me
+     when I first started using Clojure. Knowing these underlying mechanisms
+     will spare you from the kind of frustration and general mopiness often
+     exhibited by male vampires trying to retain their humanity.
+
+     You can convert the seq back into a map by using into to stick the
+     result into an empty map
+
+     #+BEGIN_SRC clojure
+
+(into {} (seq {:a 1 :b 2 :c 3}))
+; => {:a 1, :c 3, :b 2}
+
+     #+END_SRC
+
+     So, Clojure’s sequence functions use seq on their arguments. The
+     sequence functions are defined in terms of the sequence abstraction,
+     using first, rest, and cons. As long as a data structure implements the
+     sequence abstraction, it can use the extensive seq library, which
+     includes such superstar functions as reduce, filter, distinct, group-by,
+     and dozens more.
+
+     The takeaway here is that it’s powerful to focus on what we can do with
+     a data structure and to ignore, as much as possible, its implementation.
+     Implementations rarely matter in and of themselves. They’re just a means
+     to an end. In general, programming to abstractions gives you power by
+     letting you use libraries of functions on different data structure
+     regardless of how those data structures are implemented.
+
+     The following example shows how you could use this capability if you
+     were a vampire trying to curb your human consumption. You have two
+     vectors, one representing human intake in liters and another
+     representing critter intake for the past four days. The unify-diet-data
+     function takes a single day’s data for both human and critter feeding
+     and unifies the two into a single map:
+
+     #+BEGIN_SRC clojure
+
+(map inc [1 2 3])
+; => (2 3 4)
+
+;; Multiple Collections
+(map str ["a" "b" "c"] ["A" "B" "C"])
+; => ("aA" "bB" "cC")
+
+;; The same as:
+(list (str "a" "A") (str "b" "B") (str "c" "C"))
+
+;; When you pass map multiple collections, the elements of the first
+;; collection (["a" "b" "c"]) will be passed as the first argument of
+;; the mapping function (str), the elements of the second collection
+;; (["A" "B" "C"]) will be passed as the second argument, and so on.
+;; Just be sure that your mapping function can take a number of arguments
+;; equal to the number of collections you’re passing to map.
+
+;; Maps
+(def human-consumption   [8.1 7.3 6.6 5.0])
+(def critter-consumption [0.0 0.2 0.3 1.1])
+(defn unify-diet-data
+  [human critter]
+  {:human human
+   :critter critter})
+
+(map unify-diet-data human-consumption critter-consumption)
+; => ({:human 8.1, :critter 0.0}
+; =>  {:human 7.3, :critter 0.2}
+; =>  {:human 6.6, :critter 0.3}
+; =>  {:human 5.0, :critter 1.1})
+
+(def sum #(reduce + %))
+(def avg #(/ (sum %) (count %)))
+(defn stats
+  [numbers]
+  (map #(% numbers) [sum count avg]))
+
+(stats [3 4 10])
+; => (17 3 17/3)
+
+(stats [80 1 44 13 6])
+; => (144 5 144/5)
+
+
+     #+END_SRC
+
+     Additionally, Clojurists often use map to retrieve the value associated
+     with a keyword from a collection of map data structures. Because
+     keywords can be used as functions, you can do this succinctly. Here’s an
+     example:
+
+     #+BEGIN_SRC clojure
+
+(def identities
+  [{:alias "Batman" :real "Bruce Wayne"}
+   {:alias "Spider-Man" :real "Peter Parker"}
+   {:alias "Santa" :real "Your mom"}
+   {:alias "Easter Bunny" :real "Your dad"}])
+
+(map :real identities)
+; => ("Bruce Wayne" "Peter Parker" "Your mom" "Your dad")
+
+     #+END_SRC
+
+****** Reduce
+       #+BEGIN_SRC clojure
+
+;; The first use is to transform a map’s values, producing a new map
+;; with the same keys but with updated values
+(reduce (fn [new-map [key val]]
+          (assoc new-map key (inc val)))
+        {}
+        {:max 30 :min 10})
+; => {:max 31, :min 11}
+
+;; In this example, reduce treats the argument {:max 30 :min 10} as a
+;; sequence of vectors, like ([:max 30] [:min 10]). Then, it starts with
+;; an empty map (the second argument) and builds it up using the first
+;; argument, an anonymous function. It’s as if reduce does this
+
+;; The function `assoc` takes three arguments: a map, a key, and a value. It derives
+;; a new map from the map you give it by associating the given key with the given
+;; value. For example, (assoc {:a 1} :b 2) would return {:a 1 :b 2}
+(assoc (assoc {} :max (inc 30))
+       :min (inc 10))
+
+;; Another use for reduce is to filter out keys from a map based on their value. In
+;; the following example, the anonymous function checks whether the value of a
+;; key-value pair is greather than 4. If it isn’t, then the key-value pair is
+;; filtered out. In the map {:human 4.1 :critter 3.9}, 3.9 is less than 4, so the
+;; :critter key and its 3.9 value are filtered out.
+(reduce (fn [new-map [key val]]
+          (if (> val 4)
+            (assoc new-map key val)
+            new-map))
+        {}
+        {:human 4.1
+         :critter 3.9})
+; => {:human 4.1}
+
+       #+END_SRC
+
+****** Take, Drop, Take-while and drop-while
+       #+BEGIN_SRC clojure
+
+;; `take` and `drop` both take two arguments: a number and a sequence. take returns the
+;; first n elements of the sequence, whereas drop returns the sequence with the
+;; first n elements removed
+
+(take 3 [1 2 3 4 5 6 7 8 9 10])
+; => (1 2 3)
+
+(drop 3 [1 2 3 4 5 6 7 8 9 10])
+; => (4 5 6 7 8 9 10)
+
+;; Their cousins take-while and drop-while are a bit more interesting. Each takes a
+;; predicate function (a function whose return value is evaluated for truth or
+;; falsity) to determine when it should stop taking or dropping. Suppose, for
+;; example, that you had a vector representing entries in your “food” journal. Each
+;; entry has the month and day, along with what you ate. To preserve space, we’ll
+;; only include a few entries
+(def food-journal
+  [{:month 1 :day 1 :human 5.3 :critter 2.3}
+   {:month 1 :day 2 :human 5.1 :critter 2.0}
+   {:month 2 :day 1 :human 4.9 :critter 2.1}
+   {:month 2 :day 2 :human 5.0 :critter 2.5}
+   {:month 3 :day 1 :human 4.2 :critter 3.3}
+   {:month 3 :day 2 :human 4.0 :critter 3.8}
+   {:month 4 :day 1 :human 3.7 :critter 3.9}
+   {:month 4 :day 2 :human 3.7 :critter 3.6}])
+
+;; With take-while, you can retrieve just January’s and February’s data. take-while
+;; traverses the given sequence (in this case, food-journal), applying the
+;; predicate function to each element.
+
+;; This example uses the anonymous function #(< (:month %) 3) to test whether the
+;; journal entry’s month is out of range
+(take-while #(< (:month %) 3) food-journal)
+; => ({:month 1 :day 1 :human 5.3 :critter 2.3}
+; =>  {:month 1 :day 2 :human 5.1 :critter 2.0}
+; =>  {:month 2 :day 1 :human 4.9 :critter 2.1}
+; =>  {:month 2 :day 2 :human 5.0 :critter 2.5})
+
+;; When take-while reaches the first March entry, the anonymous function returns
+;; false, and take-while returns a sequence of every element it tested until that
+;; point.
+
+;; The same idea applies with drop-while except that it keeps dropping elements
+;; until one tests true
+(drop-while #(< (:month %) 3) food-journal)
+; => ({:month 3 :day 1 :human 4.2 :critter 3.3}
+; =>  {:month 3 :day 2 :human 4.0 :critter 3.8}
+; =>  {:month 4 :day 1 :human 3.7 :critter 3.9}
+; =>  {:month 4 :day 2 :human 3.7 :critter 3.6})
+
+       #+END_SRC
+
+****** Filter and some
+       #+BEGIN_SRC clojure
+
+;; Use filter to return all elements of a sequence that test true for a predicate
+;; function. Here are the journal entries where human consumption is less than five
+;; liters
+(filter #(< (:human %) 5) food-journal)
+; => ({:month 2 :day 1 :human 4.9 :critter 2.1}
+; =>  {:month 3 :day 1 :human 4.2 :critter 3.3}
+; =>  {:month 3 :day 2 :human 4.0 :critter 3.8}
+; =>  {:month 4 :day 1 :human 3.7 :critter 3.9}
+; =>  {:month 4 :day 2 :human 3.7 :critter 3.6})
+
+;; You might be wondering why we didn’t just use filter in the take-while and
+;; drop-while examples earlier. Indeed, filter would work for that too. Here we’re
+;; grabbing the January and February data, just like in the take-while example
+
+(filter #(< (:month %) 3) food-journal)
+; => ({:month 1 :day 1 :human 5.3 :critter 2.3}
+; =>  {:month 1 :day 2 :human 5.1 :critter 2.0}
+; =>  {:month 2 :day 1 :human 4.9 :critter 2.1}
+; =>  {:month 2 :day 2 :human 5.0 :critter 2.5})
+
+;; This use is perfectly fine, but filter can end up processing all of your data,
+;; which isn’t always necessary. Because the food journal is already sorted by
+;; date, we know that take-while will return the data we want without having to
+;; examine any of the data we won’t need. Therefore, take-while can be more
+;; efficient.
+
+;; Often, you want to know whether a collection contains any values that test true
+;; for a predicate function. The some function does that, returning the first
+;; truthy value (any value that’s not false or nil) returned by a predicate
+;; function
+(some #(> (:critter %) 5) food-journal)
+; => nil
+
+(some #(> (:critter %) 3) food-journal)
+; => true
+
+;; You don’t have any food journal entries where you consumed more than five liters
+;; from critter sources, but you do have at least one where you consumed more than
+;; three liters. Notice that the return value in the second example is true and not
+;; the actual entry that produced the true value. The reason is that the anonymous
+;; function #(> (:critter %) 3) returns true or false. Here’s how you could return
+;; the entry
+(some #(and (> (:critter %) 3) %) food-journal)
+; => {:month 3 :day 1 :human 4.2 :critter 3.3}
+;; Here, a slightly different anonymous function uses and to first check whether
+;; the condition (> (:critter %) 3) is true, and then returns the entry when the
+;; condition is indeed true.
+
+       #+END_SRC
+
+****** Sort and sort-by
+       #+BEGIN_SRC clojure
+
+;; Sort in ascending order
+(sort [3 1 2])
+; => (1 2 3)
+
+;; If your sorting needs are more complicated, you can use sort-by, which allows
+;; you to apply a function (sometimes called a key function) to the elements of a
+;; sequence and use the values it returns to determine the sort order. In the
+;; following example, which is taken from http://clojuredocs.org/, count is the key
+;; function
+(sort-by count ["aaa" "c" "bb"])
+; => ("c" "bb" "aaa")
+;; If you were sorting using sort, the elements would be sorted in alphabetical
+;; order, returning ("aaa" "bb" "c"). Instead, the result is ("c" "bb" "aaa")
+;; because you’re sorting by count and the count of "c" is 1, "bb" is 2, and "aaa"
+;; is 3
+
+
+       #+END_SRC
+
+****** Concat
+       #+BEGIN_SRC clojure
+
+;; Apends the members of one sequence to the end of another
+(concat [1 2] [3 4])
+; => (1 2 3 4)
+
+       #+END_SRC
+
+**** Lazy Seqs
+     As you saw earlier, map first calls seq on the collection you pass to
+     it. But that’s not the whole story. Many functions, including map and
+     filter, return a lazy seq. A lazy seq is a seq whose members aren’t
+     computed until you try to access them. Computing a seq’s members is
+     called realizing the seq. Deferring the computation until the moment
+     it’s needed makes your programs more efficient, and it has the
+     surprising benefit of allowing you to construct infinite sequences.
+
+     To see lazy seqs in action, pretend that you’re part of a modern-day
+     task force whose purpose is to identify vampires. Your intelligence
+     agents tell you that there is only one active vampire in your city, and
+     they’ve helpfully narrowed down the list of suspects to a million
+     people. Your boss gives you a list of one million Social Security
+     numbers and shouts, “Get it done, McFishwich!”
+
+     Thankfully, you are in possession of a Vampmatic 3000 computifier, the
+     state-of-the-art device for vampire identification. Because the source
+     code for this vampire-hunting technology is proprietary, I’ve stubbed it
+     out to simulate the time it would take to perform this task. Here is a
+     subset of a vampire database:
+
+     #+BEGIN_SRC clojure
+
+(def vampire-database
+  {0 {:makes-blood-puns? false, :has-pulse? true  :name "McFishwich"}
+   1 {:makes-blood-puns? false, :has-pulse? true  :name "McMackson"}
+   2 {:makes-blood-puns? true,  :has-pulse? false :name "Damon Salvatore"}
+   3 {:makes-blood-puns? true,  :has-pulse? true  :name "Mickey Mouse"}})
+
+(defn vampire-related-details
+  [social-security-number]
+  (Thread/sleep 1000)
+  (get vampire-database social-security-number))
+
+(defn vampire?
+  [record]
+  (and (:makes-blood-puns? record)
+       (not (:has-pulse? record))
+       record))
+
+(defn identify-vampire
+  [social-security-numbers]
+  (first (filter vampire?
+                 (map vampire-related-details social-security-numbers))))
+
+;; You have a function, vampire-related-details, which takes one second to look up
+;; an entry from the database. Next, you have a function, vampire?, which returns a
+;; record if it passes the vampire test; otherwise, it returns false. Finally,
+;; identify-vampire maps Social Security numbers to database records and then
+;; returns the first record that indicates vampirism.
+
+;; To show how much time it takes to run these functions, you can use the time
+;; operation. When you use time, your code behaves exactly as it would if you
+;; didn’t use time, but with one exception: a report of the elapsed time is
+;; printed. Here’s an example
+(time (vampire-related-details 0))
+; => "Elapsed time: 1001.042 msecs"
+; => {:name "McFishwich", :makes-blood-puns? false, :has-pulse? true}
+
+;; The first printed line reports the time taken by the given operation—in this
+;; case, 1,001.042 milliseconds. The second is the return value, which is your
+;; database record in this case. The return value is exactly the same as it would
+;; have been if you hadn’t used time
+
+;; A nonlazy implementation of map would first have to apply
+;; vampire-related-details to every member of social-security-numbers before
+;; passing the result to filter. Because you have one million suspects, this would
+;; take one million seconds, or 12 days, and half your city would be dead by then!
+;; Of course, if it turns out that the only vampire is the last suspect in the
+;; record, it will still take that much time with the lazy version, but at least
+;; there’s a good chance that it won’t.
+
+;; Because map is lazy, it doesn’t actually apply vampire-related-details to Social
+;; Security numbers until you try to access the mapped element. In fact, map
+;; returns a value almost instantly
+(time (def mapped-details (map vampire-related-details (range 0 1000000))))
+; => "Elapsed time: 0.049 msecs"
+; => #'user/mapped-details
+
+;; In this example, range returns a lazy sequence consisting of the integers from 0
+;; to 999,999. Then, map returns a lazy sequence that is associated with the name
+;; mapped-details. Because map didn’t actually apply vampire-related-details to any
+;; of the elements returned by range, the entire operation took barely any
+;; time—certainly less than 12 days.
+
+;; You can think of a lazy seq as consisting of two parts: a recipe for how to
+;; realize the elements of a sequence and the elements that have been realized so
+;; far. When you use map, the lazy seq it returns doesn’t include any realized
+;; elements yet, but it does have the recipe for generating its elements. Every
+;; time you try to access an unrealized element, the lazy seq will use its recipe
+;; to generate the requested element.
+
+;; In the previous example, mapped-details is unrealized. Once you try to access a
+;; member of mapped-details, it will use its recipe to generate the element you’ve
+;; requested, and you’ll incur the one-second-per-database-lookup cost:
+(time (first mapped-details))
+; => "Elapsed time: 32030.767 msecs"
+; => {:name "McFishwich", :makes-blood-puns? false, :has-pulse? true}
+
+;; This operation took about 32 seconds. That’s much better than one million
+;; seconds, but it’s still 31 seconds more than we would have expected. After all,
+;; you’re only trying to access the very first element, so it should have taken
+;; only one second.
+
+;; The reason it took 32 seconds is that Clojure chunks its lazy sequences, which
+;; just means that whenever Clojure has to realize an element, it preemptively
+;; realizes some of the next elements as well. In this example, you wanted only the
+;; very first element of mapped-details, but Clojure went ahead and prepared the
+;; next 31 as well. Clojure does this because it almost always results in better
+;; performance.
+
+;; Thankfully, lazy seq elements need to be realized only once. Accessing the first
+;; element of mapped-details again takes almost no time:
+(time (first mapped-details))
+; => "Elapsed time: 0.022 msecs"
+; => {:name "McFishwich", :makes-blood-puns? false, :has-pulse? true}
+
+(time (identify-vampire (range 0 1000000)))
+"Elapsed time: 32019.912 msecs"
+; => {:name "Damon Salvatore", :makes-blood-puns? true, :has-pulse? false}
+
+     #+END_SRC
+**** Infinite Sequences
+     One cool, useful capability that lazy seqs give you is the ability to
+     construct infinite sequences. So far, you’ve only worked with lazy
+     sequences generated from vectors or lists that terminated. However, Clojure
+     comes with a few functions to create infinite sequences. One easy way to
+     create an infinite sequence is with repeat, which creates a sequence whose
+     every member is the argument you pass:
+
+     #+BEGIN_SRC clojure
+
+;; In this case, you create an infinite sequence whose every element is the
+;; string "na", then use that to construct a sequence that may or not provoke
+;; nostalgia.
+(concat (take 8 (repeat "na")) ["Batman!"])
+; => ("na" "na" "na" "na" "na" "na" "na" "na" "Batman!")
+
+;; You can also use repeatedly, which will call the provided function to generate
+;; each element in the sequence:
+(take 3 (repeatedly (fn [] (rand-int 10))))
+; => (1 4 0)
+
+;; Here, the lazy sequence returned by repeatedly generates every new element by
+;; calling the anonymous function (fn [] (rand-int 10)), which returns a random
+;; integer between 0 and 9. If you run this in your REPL, your result will most
+;; likely be different from this one.
+
+;; A lazy seq’s recipe doesn’t have to specify an endpoint. Functions like first
+;; and take, which realize the lazy seq, have no way of knowing what will come next
+;; in a seq, and if the seq keeps providing elements, well, they’ll just keep
+;; taking them. You can see this if you construct your own infinite sequence:
+
+(defn even-numbers
+  ;; if no arg provided return even-numbers with arg 0
+  ([] (even-numbers 0))
+
+  ;; if has args, take the arg, sum + 2, and put both in list
+  ([n] (cons n (lazy-seq (even-numbers (+ n 2))))))
+
+(take 10 (even-numbers))
+; => (0 2 4 6 8 10 12 14 16 18)
+
+;; This example is a bit mind-bending because of its use of recursion. It helps to
+;; remember that cons returns a new list with an element appended to the given list
+(cons 0 '(2 4 6))
+; => (0 2 4 6)
+
+;; (Incidentally, Lisp programmers call it consing when they use the cons
+;; function.)
+
+;; In even-numbers, you’re consing to a lazy list, which includes a recipe (a
+;; function) for the next element (as opposed to consing to a fully realized list).
+
+;; And that covers lazy seqs! Now you know everything there is to know about the
+;; sequence abstraction, and we can turn to the collection abstraction!
+
+     #+END_SRC
+**** Collection Abstraction
+     The collection abstraction is closely related to the sequence abstraction.
+     All of Clojure’s core data structures—vectors, maps, lists, and sets—take
+     part in both abstractions.
+
+     The sequence abstraction is about operating on members individually,
+     whereas the collection abstraction is about the data structure as a whole.
+     For example, the collection functions count, empty?, and every? aren’t
+     about any individual element; they’re about the whole:
+
+     #+BEGIN_SRC clojure
+
+(empty? [])
+; => true
+
+(empty? ["no!"])
+; => false
+
+;; Practically speaking, you’ll rarely consciously say, “Okay, self! You’re working
+;; with the collection as a whole now. Think in terms of the collection
+;; abstraction!” Nevertheless, it’s useful to know these concepts that underlie the
+;; functions and data structures you’re using.
+
+;; Now we’ll examine two common collection functions—into and conj—whose
+;; similarities can be a bit confusing.
+
+;; One of the most important collection functions is into. As you now know, many
+;; seq functions return a seq rather than the original data structure. You’ll
+;; probably want to convert the return value back into the original value, and into
+;; lets you do that:
+(map identity {:sunlight-reaction "Glitter!"})
+; => ([:sunlight-reaction "Glitter!"])
+
+(into {} (map identity {:sunlight-reaction "Glitter!"}))
+; => {:sunlight-reaction "Glitter!"}
+
+;; Here, the map function returns a sequential data structure after being given a
+;; map data structure, and into converts the seq back into a map.
+
+;; This will work with other data structures as well
+(map identity [:garlic :sesame-oil :fried-eggs])
+; => (:garlic :sesame-oil :fried-eggs)
+
+(into [] (map identity [:garlic :sesame-oil :fried-eggs]))
+; => [:garlic :sesame-oil :fried-eggs]
+
+;; Here, in the first line, map returns a seq, and we use into in the second line
+;; to convert the result back to a vector.
+
+;; In the following example, we start with a vector with two identical entries, map
+;; converts it to a list, and then we use into to stick the values into a set.
+(map identity [:garlic-clove :garlic-clove])
+; => (:garlic-clove :garlic-clove)
+
+(into #{} (map identity [:garlic-clove :garlic-clove]))
+; => #{:garlic-clove}
+
+;; Because sets only contain unique values, the set ends up with just one value in
+;; it.
+
+;; The first argument of into doesn’t have to be empty. Here, the first example
+;; shows how you can use into to add elements to a map, and the second shows how
+;; you can add elements to a vector.
+(into {:favorite-emotion "gloomy"} [[:sunlight-reaction "Glitter!"]])
+; => {:favorite-emotion "gloomy" :sunlight-reaction "Glitter!"}
+
+(into ["cherry"] '("pine" "spruce"))
+; => ["cherry" "pine" "spruce"]
+
+;; And, of course, both arguments can be the same type. In this next example, both
+;; arguments are maps, whereas all the previous examples had arguments of different
+;; types. It works as you’d expect, returning a new map with the elements of the
+;; second map added to the first
+(into {:favorite-animal "kitty"} {:least-favorite-smell "dog"
+                                  :relationship-with-teenager "creepy"})
+; => {:favorite-animal "kitty"
+; =>  :relationship-with-teenager "creepy"
+; =>  :least-favorite-smell "dog"}
+
+;; If into were asked to describe its strengths at a job interview, it would say,
+;; “I’m great at taking two collections and adding all the elements from the second
+;; to the first.”
+
+;; conj also adds elements to a collection, but it does it in a slightly different
+;; way
+(conj [0] [1])
+; => [0 [1]]
+
+;; Whoopsie! Looks like it added the entire vector [1] to [0]. Compare this with
+;; into
+(into [0] [1])
+; => [0 1]
+
+;; Here’s how we’d do the same with conj
+(conj [0] 1)
+; => [0 1]
+
+;; Notice that the number 1 is passed as a scalar (singular, non-collection) value,
+;; whereas into’s second argument must be a collection.
+
+;; You can supply as many elements to add with conj as you want, and you can also
+;; add to other collections like maps:
+(conj [0] 1 2 3 4)
+; => [0 1 2 3 4]
+
+(conj {:time "midnight"} [:place "ye olde cemetarium"])
+; => {:place "ye olde cemetarium" :time "midnight"}
+
+;; conj and into are so similar that you could even define conj in terms of into
+(defn my-conj
+  [target & additions]
+  (into target additions))
+
+(my-conj [0] 1 2 3)
+; => [0 1 2 3]
+
+;; This kind of pattern isn’t that uncommon. You’ll often see two functions that do
+;; the same thing, except one takes a rest parameter (conj) and one takes a seqable
+;; data structure (into).
+
+     #+END_SRC
+**** Function Functions
+     Learning to take advantage of Clojure’s ability to accept functions as
+     arguments and return functions as values is really fun, even if it takes
+     some getting used to.
+
+     Two of Clojure’s functions, apply and partial, might seem especially weird
+     because they both accept and return functions. Let’s unweird them.
+
+***** apply
+      apply explodes a seqable data structure so it can be passed to a function
+      that expects a rest parameter. For example, max takes any number of
+      arguments and returns the greatest of all the arguments. Here’s how you’d
+      find the greatest number:
+
+     #+BEGIN_SRC clojure
+
+(max 0 1 2)
+; => 2
+
+;; But what if you want to find the greatest element of a vector? You can’t just
+;; pass the vector to max
+(max [0 1 2])
+; => [0 1 2]
+
+;; This doesn’t return the greatest element in the vector because max returns the
+;; greatest of all the arguments passed to it, and in this case you’re only passing
+;; it a vector containing all the numbers you want to compare, rather than passing
+;; in the numbers as separate arguments. apply is perfect for this situation:
+(apply max [0 1 2])
+; => 2
+
+;; By using apply, it’s as if you called (max 0 1 2). You’ll often use apply like
+;; this, exploding the elements of a collection so that they get passed to a
+;; function as separate arguments.
+
+;; Remember how we defined conj in terms of into earlier? Well, we can also define
+;; into in terms of conj by using apply:
+(defn my-into
+  [target additions]
+  (apply conj target additions))
+
+(my-into [0] [1 2 3])
+; => [0 1 2 3]
+
+;; This call to my-into is equivalent to calling (conj [0] 1 2 3)
+
+     #+END_SRC
+***** partial
+      partial takes a function and any number of arguments. It then returns a
+      new function. When you call the returned function, it calls the original
+      function with the original arguments you supplied it along with the new
+      arguments.
+
+      Here’s an example
+
+      #+BEGIN_SRC clojure
+
+(def add10 (partial + 10))
+(add10 3)
+; => 13
+(add10 5)
+; => 15
+
+(def add-missing-elements
+  (partial conj ["water" "earth" "air"]))
+
+(add-missing-elements "unobtainium" "adamantium")
+; => ["water" "earth" "air" "unobtainium" "adamantium"]
+
+;; So when you call add10, it calls the original function and arguments (+ 10) and
+;; tacks on whichever arguments you call add10 with. To help clarify how partial
+;; works, here’s how you might define it:
+(defn my-partial
+  [partialized-fn & args]
+  (fn [& more-args]
+    (apply partialized-fn (into args more-args))))
+
+(def add20 (my-partial + 20))
+(add20 3)
+; => 23
+
+;; In this example, the value of add20 is the anonymous function returned by
+;; my-partial. The anonymous function is defined like this:
+(fn [& more-args]
+  (apply + (into [20] more-args)))
+
+;; In general, you want to use partials when you find you’re repeating the same
+;; combination of function and arguments in many different contexts. This toy
+;; example shows how you could use partial to specialize a logger, creating a warn
+;; function:
+(defn lousy-logger
+  [log-level message]
+  (condp = log-level
+    :warn (clojure.string/lower-case message)
+    :emergency (clojure.string/upper-case message)))
+
+(def warn (partial lousy-logger :warn))
+
+(warn "Red light ahead")
+; => "red light ahead"
+
+;; Calling (warn "Red light ahead") here is identical to
+;; calling (lousy-logger :warn "Red light ahead")
+
+      #+END_SRC
+***** complement
+      Earlier you created the identify-vampire function to find one vampire amid a
+      million people. What if you wanted to create a function to find all humans?
+      Perhaps you want to send them thank-you cards for not being an undead predator.
+      Here’s how you could do it:
+
+      #+BEGIN_SRC clojure
+
+(defn identify-humans
+  [social-security-numbers]
+  (filter #(not (vampire? %))
+          (map vampire-related-details social-security-numbers)))
+
+;; Look at the first argument to filter, #(not (vampire? %)). It’s so common to
+;; want the complement (the negation) of a Boolean function that there’s a
+;; function, complement, for that
+(def not-vampire? (complement vampire?))
+(defn identify-humans
+  [social-security-numbers]
+  (filter not-vampire?
+          (map vampire-related-details social-security-numbers)))
+
+(defn my-complement
+  [fun]
+  (fn [& args]
+    (not (apply fun args))))
+
+(def my-pos? (complement neg?))
+(my-pos? 1)
+; => true
+
+(my-pos? -1)
+; => false
+;; As you can see, complement is a humble function. It does one little thing and
+;; does it well. complement made it trivial to create a not-vampire? function, and
+;; anyone reading the code could understand the code’s intention.
+
+;; This won’t MapReduce terabytes of data for you or anything like that, but it
+;; does demonstrate the power of higher-order functions. They allow you to build up
+;; libraries of utility functions in a way that is impossible in some languages. In
+;; aggregate, these utility functions make your life a lot easier.
+
+      #+END_SRC
+**** Project: Vampire Data Analysis Program for FWPD
+     To pull everything together, let’s write the beginnings of a sophisticated
+     vampire data analysis program for the Forks, Washington Police Department
+     (FWPD).
+
+     The FWPD has a fancy new database technology called CSV (comma-separated
+     values). Your job is to parse this state-of-the-art CSV and analyze it for
+     potential vampires. We’ll do that by filtering on each suspect’s glitter
+     index, a 0–10 prediction of the suspect’s vampireness developed by some
+     teenage girl. Go ahead and create a new Leiningen project for your tool:
+
+     #+BEGIN_SRC shell
+
+lein new app fwpd-vampire-data-analysis
+
+     #+END_SRC
+
+     Now it’s time to get your hands dirty by building up the
+     fwpd/src/fwpd/core.clj file. I recommend that you start a new REPL session
+     so you can try things out as you go along. In Emacs you can do this by
+     opening fwpd/src/fwpd/core.clj and running M-x cider-restart. Once the REPL
+     is started, delete the contents of core.clj, and then add this:
+
+     #+BEGIN_SRC clojure
+
+(ns fwpd-vampire-data-analysis.core
+  (:gen-class))
+
+;; Now it’s time to get your hands dirty by building up the fwpd/src/fwpd/core.clj
+;; file. I recommend that you start a new REPL session so you can try things out as
+;; you go along. In Emacs you can do this by opening fwpd/src/fwpd/core.clj and
+;; running M-x cider-restart. Once the REPL is started, delete the contents of
+;; core.clj, and then add this:
+
+(def filename "suspects.csv")
+
+(slurp filename)
+                                        ; => "Edward Cullen,10\nBella Swan,0\nCharlie Swan,0\nJacob Black,3\nCarlisle Cullen,6"
+
+;; If the slurp function doesn’t return the preceding string, try restarting your
+;; REPL session with core.clj open.
+
+;; Next, add this to core.clj:
+(def vamp-keys [:name :glitter-index])
+
+(defn str->int
+  [str]
+  (Integer. str))
+
+(def conversions {:name identity
+                  :glitter-index str->int})
+
+(defn convert
+  [vamp-key value]
+  ((get conversions vamp-key) value))
+
+;; Ultimately, you’ll end up with a sequence of maps that look like {:name "Edward
+;; Cullen" :glitter-index 10}, and the preceding definitions help you get there.
+;; First, vamp-keys ➊ is a vector of the keys that you’ll soon use to create
+;; vampire maps. Next, the function str->int ➋ converts a string to an integer. The
+;; map conversions ➌ associates a conversion function with each of the vamp keys.
+;; You don’t need to transform the name at all, so its conversion function is
+;; identity, which just returns the argument passed to it. The glitter index is
+;; converted to an integer, so its conversion function is str->int. Finally, the
+;; convert function ➍ takes a vamp key and a value, and returns the converted
+;; value. Here’s an example:
+(convert :glitter-index "3")
+                                        ; => 3
+
+(defn parse
+  "Convert a CSV into rows of columns"
+  [string]
+  (map #(clojure.string/split % #",")
+       (clojure.string/split string #"\r\n")))
+
+;; The parse function takes a string and first splits it on the newline character
+;; to create a seq of strings. Next, it maps over the seq of strings, splitting
+;; each one on the comma character. Try running parse on your CSV:
+(parse (slurp filename))
+                                        ; => (["Edward Cullen" "10"] ["Bella Swan" "0"] ["Charlie Swan" "0"]
+                                        ; =>  ["Jacob Black" "3"] ["Carlisle Cullen" "6"])
+
+;; The next bit of code takes the seq of vectors and combines it with your vamp
+;; keys to create maps:
+(defn mapify
+  "Return a seq of maps like {:name \"Edward Cullen\" :glitter-index 10}"
+  [rows]
+  (map (fn [unmapped-row]
+         ;; Reduce fn with {} and map vector
+         (reduce (fn [row-map [vamp-key value]]
+                   ;; associate a vamp key with value
+                   ;; convert the string to int
+                   (assoc row-map vamp-key (convert vamp-key value)))
+                 {}
+                 (map vector vamp-keys unmapped-row)))
+       ;; Arg for first fn
+       rows))
+
+;; In this function, map transforms each row—vectors like ["Bella Swan" 0]—into a
+;; map by using reduce in a manner similar to the first example in “reduce” above.
+;; First, map creates a seq of key-value pairs like ([:name "Bella
+;; Swan"] [:glitter-index 0]). Then, reduce builds up a map by associating a vamp
+;; key with a converted vamp value into row-map. Here’s the first row mapified:
+(first (mapify (parse (slurp filename))))
+                                        ; => {:glitter-index 10, :name "Edward Cullen"}
+
+(defn glitter-filter
+  [minimum-glitter records]
+  (filter #(>= (:glitter-index %) minimum-glitter) records))
+
+;; This takes fully mapified vampire records and filters out those with
+;; a :glitter-index less than the provided minimum-glitter:
+(glitter-filter 3 (mapify (parse (slurp filename))))
+                                        ; => ({:name "Edward Cullen", :glitter-index 10}
+                                        ; =>  {:name "Jacob Black", :glitter-index 3}
+                                        ; =>  {:name "Carlisle Cullen", :glitter-index 6})
+
+;; Et voilà! You are now one step closer to fulfilling your dream of being a
+;; supernatural-creature-hunting vigilante. You better go round up those sketchy
+;; characters!
+
+     #+END_SRC
+
+     In this chapter, you learned that Clojure emphasizes programming to
+     abstractions. The sequence abstraction deals with operating on the
+     individual elements of a sequence, and seq functions often convert their
+     arguments to a seq and return a lazy seq. Lazy evaluation improves
+     performance by delaying computations until they’re needed. The other
+     abstraction you learned about, the collection abstraction, deals with data
+     structures as a whole. Finally, the most important thing you learned is
+     that you should never trust someone who sparkles in sunlight.
+**** Exercises
+     The vampire analysis program you now have is already decades ahead of
+     anything else on the market. But how could you make it better? I suggest
+     trying the following:
+
+     1. Turn the result of your glitter filter into a list of names.
+     2. Write a function, append, which will append a new suspect to your
+        list of suspects.
+     3. Write a function, validate, which will check that :name and
+        :glitter-index are present when you append. The validate function
+        should accept two arguments: a map of keywords to validating
+        functions, similar to conversions, and the record to be validated.
+     4. Write a function that will take your list of maps and convert it
+        back to a CSV string. You’ll need to use the clojure.string/join
+        function.
+
+     Good luck, McFishwich!
+
+     #+BEGIN_SRC clojure
+
+;; 1.
+(defn glitter-filter
+  [minimum-glitter records]
+  (map :name (filter #(>= (:glitter-index %) minimum-glitter) records)))
+
+;; or
+(defn glitter-filter-names
+  [minimum-glitter records]
+  (map :name (glitter-filter minimum-glitter records)))
+
+;; This takes fully mapified vampire records and filters out those with
+;; a :glitter-index less than the provided minimum-glitter:
+(glitter-filter 3 (mapify (parse (slurp filename))))
+                                        ; => ("Edward Cullen",
+                                        ; =>  "Jacob Black",
+                                        ; =>  "Carlisle Cullen")
+
+;; 2.
+(defn append
+  [list-of-suspects name glitter]
+  (conj list-of-suspects (into {} {:name name :glitter-index glitter})))
+
+(append (mapify (parse (slurp filename))) "George Har" 22)
+
+;; 3.
+(defn validate
+  [keywords new-suspect]
+  (apply = (keys new-suspect) (vals keywords)))
+
+(validate {:keywords [:name :glitter-index]} {:name "that" :glitter-index 32})
+
+;; 4.
+(defn append-validate
+  [suspects new-suspect keywords]
+  (if (validate keywords new-suspect)
+    (conj suspects new-suspect)
+    suspects))
+
+(append-validate a-list-of-suspects {:name "that" :glitter-index 10} {:keywords [:name :glitter-index]})
+
+
+
+     #+END_SRC
